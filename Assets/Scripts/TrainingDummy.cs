@@ -22,7 +22,7 @@ public class TrainingDummy : MonoBehaviour
     void OnHit(int current, int max)
     {
         if (current > 0)
-            animator.SetTrigger("TakeDamage");
+            animator.SetTrigger("Hit");
     }
 
     void OnDeath()

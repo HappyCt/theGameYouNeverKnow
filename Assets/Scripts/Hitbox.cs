@@ -9,6 +9,9 @@ public class Hitbox : MonoBehaviour
     private int damage;
     private float offset;
     private Vector2 size;
+    private GameObject owner;
+
+    public void SetOwner(GameObject go) => owner = go;
 
     void Awake()
     {
@@ -22,6 +25,14 @@ public class Hitbox : MonoBehaviour
         damage = dmg;
         offset = ofs;
         size = sz;
+    }
+
+    public void Enable()
+    {
+        transform.localPosition = Vector2.zero;
+        transform.localRotation = Quaternion.identity;
+        hitTargets.Clear();
+        col.enabled = true;
     }
 
     public void Enable(Vector2 direction)
@@ -49,6 +60,6 @@ public class Hitbox : MonoBehaviour
         if (hurtbox == null) return;
 
         hitTargets.Add(other);
-        hurtbox.ReceiveDamage(damage);
+        hurtbox.ReceiveDamage(damage, owner != null ? owner : transform.root.gameObject);
     }
 }

@@ -18,6 +18,7 @@ public class PlayerAttack : MonoBehaviour
 
     private Animator animator;
     private PlayerMovement movement;
+    private PlayerHit hit;
 
     private bool isAttacking;
     private bool isBlocking;
@@ -30,6 +31,8 @@ public class PlayerAttack : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         movement = GetComponent<PlayerMovement>();
+        hit = GetComponent<PlayerHit>();
+        hitbox.SetOwner(gameObject);
     }
 
     void Update()
@@ -57,6 +60,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         isAttacking = true;
+        hit?.OnHitEnd();
     }
 
     void HandleBlock()
@@ -64,7 +68,10 @@ public class PlayerAttack : MonoBehaviour
         bool wantsBlock = Input.GetKey(KeyCode.X) && !isAttacking;
 
         if (wantsBlock && !isBlocking)
+        {
+            hit?.OnHitEnd();
             animator.SetTrigger("BlockStart");
+        }
 
         if (wantsBlock != isBlocking)
         {
@@ -79,6 +86,7 @@ public class PlayerAttack : MonoBehaviour
         if (isAttacking || isBlocking) return;
 
         isAttacking = true;
+        hit?.OnHitEnd();
         hitbox.SetConfig(specialConfig.damage, specialConfig.offset, specialConfig.size);
         animator.SetTrigger("Special");
     }

@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private PlayerAttack attack;
+    private PlayerHit hit;
     private Vector2 moveInput;
     private Vector2 lastMoveDir = Vector2.down;
     private Vector2 runAttackDir;
@@ -20,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         attack = GetComponent<PlayerAttack>();
+        hit = GetComponent<PlayerHit>();
     }
 
     void Update()
@@ -30,7 +32,7 @@ public class PlayerMovement : MonoBehaviour
 
         IsSprinting = Input.GetKey(KeyCode.LeftShift) && moveInput != Vector2.zero;
 
-        bool frozen = attack.IsLocked || attack.IsRunAttacking;
+        bool frozen = attack.IsLocked || attack.IsRunAttacking || (hit != null && hit.IsHit);
 
         if (!frozen && moveInput != Vector2.zero)
             lastMoveDir = moveInput;
@@ -52,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (attack.IsLocked)
+        if (attack.IsLocked || (hit != null && hit.IsHit))
         {
             rb.velocity = Vector2.zero;
             return;
