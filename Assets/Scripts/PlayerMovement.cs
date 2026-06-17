@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 runAttackDir;
     private bool wasRunAttacking;
     public bool IsSprinting { get; private set; }
+    public Vector2 LastMoveDir => lastMoveDir;
 
     void Start()
     {
@@ -34,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
         if (!frozen && moveInput != Vector2.zero)
             lastMoveDir = moveInput;
 
-        // 奔跑攻击开始瞬间捕获方向
+        // Capture direction at the moment run attack starts
         if (attack.IsRunAttacking && !wasRunAttacking)
             runAttackDir = lastMoveDir;
         wasRunAttacking = attack.IsRunAttacking;
