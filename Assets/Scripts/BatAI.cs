@@ -173,6 +173,7 @@ public class BatAI : MonoBehaviour, IStunnable
         hitbox?.Disable();
         animator?.SetTrigger("Die");
         enabled = false;
+        Destroy(gameObject, 2f);
     }
 
     void SetState(State next)

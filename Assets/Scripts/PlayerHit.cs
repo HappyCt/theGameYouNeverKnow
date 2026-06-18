@@ -5,7 +5,11 @@ public class PlayerHit : MonoBehaviour
 {
     public bool IsHit { get; private set; }
 
-    public float blockFlashDuration = 0.2f;
+    public float flashDuration = 0.2f;
+    public float invincibilityDuration = 1f;
+
+    private bool isInvincible;
+    private Color originalColor;
 
     private Animator animator;
     private Hurtbox hurtbox;
@@ -22,8 +26,12 @@ public class PlayerHit : MonoBehaviour
         attack = GetComponent<PlayerAttack>();
         movement = GetComponent<PlayerMovement>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        if (spriteRenderer != null)
+            originalColor = spriteRenderer.color;
+
         hurtbox.OnAttackReceived += OnAttackReceived;
-        hurtbox.DamageCheck = (dmg, atk) => IsBlocked(atk);
+        hurtbox.DamageCheck = (dmg, atk) => IsBlocked(atk) || isInvincible;
 
         var health = GetComponent<Health>();
         if (health != null) health.OnDeath.AddListener(OnDeath);
@@ -47,6 +55,8 @@ public class PlayerHit : MonoBehaviour
         Vector2 knockbackDir = (attacker.transform.position - transform.position).normalized;
         attacker.GetComponent<IStunnable>()?.EnterStun(knockbackDir);
 
+        if (isInvincible) return;
+
         if (IsBlocked(attacker))
         {
             StopCoroutine("BlockFlash");
@@ -57,10 +67,12 @@ public class PlayerHit : MonoBehaviour
 
         attack?.OnAttackEnd();
         IsHit = true;
+        isInvincible = true;
         rb.velocity = Vector2.zero;
         animator?.SetTrigger("TakeDamage");
         StopCoroutine("BlockFlash");
         StartCoroutine(HitFlash());
+        StartCoroutine(InvincibilityRoutine());
     }
 
     void OnDeath()
@@ -81,25 +93,32 @@ public class PlayerHit : MonoBehaviour
         movement.enabled = true;
         attack.enabled = true;
         IsHit = false;
+        isInvincible = false;
+        if (spriteRenderer != null)
+            spriteRenderer.color = originalColor;
         enabled = true;
+    }
+
+    IEnumerator InvincibilityRoutine()
+    {
+        yield return new WaitForSeconds(invincibilityDuration);
+        isInvincible = false;
     }
 
     IEnumerator HitFlash()
     {
         if (spriteRenderer == null) yield break;
-        Color original = spriteRenderer.color;
         spriteRenderer.color = new Color(1f, 0.4f, 0.4f);
-        yield return new WaitForSeconds(blockFlashDuration);
-        spriteRenderer.color = original;
+        yield return new WaitForSeconds(flashDuration);
+        spriteRenderer.color = originalColor;
     }
 
     IEnumerator BlockFlash()
     {
         if (spriteRenderer == null) yield break;
-        Color original = spriteRenderer.color;
         spriteRenderer.color = new Color(0.4f, 0.7f, 1f);
-        yield return new WaitForSeconds(blockFlashDuration);
-        spriteRenderer.color = original;
+        yield return new WaitForSeconds(flashDuration);
+        spriteRenderer.color = originalColor;
     }
 
     // Animation Event: called at the end of the hit animation
